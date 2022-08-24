@@ -6,6 +6,7 @@ metadata:
 data:
   mysqld.cnf: |-
     [mysqld]
+    datadir=/var/lib/mysql
     default_storage_engine=innodb
     skip_external_locking
     lower_case_table_names=1

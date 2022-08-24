@@ -17,7 +17,7 @@ spec:
     spec: #期望Pod实现的功能（即在pod中部署）
       containers: #生成container，与docker中的container是同一种
       - name: mysql
-        image: centos/mysql-57-centos7:latest #使用镜像mysql: 创建container，该container默认3306端口可访问
+        image: mysql:5.7 #使用镜像mysql: 创建container，该container默认3306端口可访问
         #kubelet 使用 liveness probe（存活探针）来确定何时重启容器。例如，当应用程序处于运行状态但无法做进一步操作，liveness 探针将捕获到 deadlock，重启处于该状态下的容器，使应用程序在存在 bug 的情况下依然能够继续运行下去
         livenessProbe:
           exec:
@@ -62,22 +62,47 @@ spec:
         - name: MYSQL_USER
           value: gelu 
         volumeMounts:
-        # - name: data
-        #   mountPath: /var/lib/mysql
+        - name: data
+          mountPath: /var/lib/mysql
         - name: mysql-config
-          mountPath: /etc/my.cnf.d/my.cnf
-          subPath: my.cnf
-        - name: localtime
-          readOnly: true
-          mountPath: /etc/localtime
+          mountPath: /etc/my.cnf.d/
+        # - name: localtime
+        #   readOnly: true
+        #   mountPath: /etc/localtime
+      dnsPolicy: ClusterFirst
+      #Init 容器支持应用容器的全部字段和特性，包括资源限制、数据卷和安全设置。 然而，Init 容器对资源请求和限制的处理稍有不同，在下面 资源 处有说明。 而且 Init 容器不支持 Readiness Probe，因为它们必须在 Pod 就绪之前运行完成。
+      #如果为一个 Pod 指定了多个 Init 容器，那些容器会按顺序一次运行一个。 每个 Init 容器必须运行成功，下一个才能够运行。 当所有的 Init 容器运行完成时，Kubernetes 初始化 Pod 并像平常一样运行应用容器。
+      #mysql这里的initContainer是为了保证在POD启动前，PV盘要先行绑定成功。
+      initContainers:
+        - command:
+            - rm
+            - -rf
+            - /var/lib/mysql/lost+found
+          image: busybox:1.29.3
+          imagePullPolicy: IfNotPresent
+          name: remove-lost-found
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts:
+            - mountPath: /var/lib/mysql
+              name: data
+      restartPolicy: Always
+      #scheduler 是 kubernetes 的调度器，主要的任务是把定义的 pod 分配到集群的节点上。
+      schedulerName: default-scheduler
+      securityContext: {}
+      #如果您的Pod通常需要超过30秒才能关闭，请确保增加优雅终止宽限期。可以通过在Pod YAML中设置terminationGracePeriodSeconds选项来实现.
+      #如果容器在优雅终止宽限期后仍在运行，则会发送SIGKILL信号并强制删除。与此同时，所有的Kubernetes对象也会被清除。
+      terminationGracePeriodSeconds: 30
+      #定义数据卷PVC,与PV匹配。
       volumes:
-      # - name: data
-      #   persistentVolumeClaim:
-      #     claimName: mysql
+      - name: data
+        persistentVolumeClaim:
+          claimName: mysql
       - name: mysql-config
         configMap:
           name: mysql-config
-      - name: localtime
-        hostPath:
-          type: File
-          path: /etc/localtime
+      # - name: localtime
+      #   hostPath:
+      #     type: File
+      #     path: /etc/localtime

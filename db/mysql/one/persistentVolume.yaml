@@ -13,7 +13,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   #表示使用本地存储
   local:
-    path: /mnt/disks/vol1
+    path: /run/desktop/mnt/host/g/data/mysql
   #使用local pv时必须定义nodeAffinity，Kubernetes Scheduler需要使用PV的nodeAffinity描述信息来保证Pod能够调度到有对应local volume的Node上。
   #创建local PV之前，你需要先保证有对应的storageClass已经创建。
   nodeAffinity:
@@ -25,3 +25,7 @@ spec:
           values:
           # pod 需要分不到的主机名，这台主机上开启了 local-pv 资源。
           - docker-desktop
+  claimRef:
+    kind: PersistentVolumeClaim
+    namespace: db
+    name: mysql
