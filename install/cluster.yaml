@@ -1,0 +1,20 @@
+#################################################################################################################
+# Define the settings for the rook-ceph cluster with common settings for a production cluster.
+# All nodes with available raw devices will be used for the Ceph cluster. At least three nodes are required
+# in this example. See the documentation for more details on storage settings available.
+
+# For example, to create the cluster:
+#   kubectl create -f crds.yaml -f common.yaml -f operator.yaml
+#   kubectl create -f cluster.yaml
+#################################################################################################################
+
+apiVersion: ceph.rook.io/v1
+kind: CephCluster
+metadata:
+  name: rook-ceph
+  namespace: rook-ceph # namespace:cluster
+spec:
+  cephVersion:
+    # The container image used to launch the Ceph daemon pods (mon, mgr, osd, mds, rgw).
+    # v16 is Pacific, and v17 is Quincy.
+    # RECOMMENDATION: In production, use a specific version tag inste
