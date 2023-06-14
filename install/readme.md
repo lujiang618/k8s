@@ -226,3 +226,4 @@ systemctl stop kubelet
 - [使用官方社区工具kubeadm部署k8s](https://zhuanlan.zhihu.com/p/64661540)
 - [解决k8s Error registering network: failed to acquire lease: node “master“ pod cidr not assigne](https://blog.51cto.com/u_4820306/5425052)
 - [k8s “Unable to update cni config: No networks found in /etc/cni/net.d“解决方案](https://blog.csdn.net/qq_26545503/article/details/123183184)
+- [使用kubeadm在Ubuntu20.04环境下搭建k8s集群](https://www.cnblogs.com/TT0TT/p/15845639.html)
